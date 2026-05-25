@@ -1,111 +1,357 @@
-import React, { useState, useEffect } from 'react';
-import GlassCard from '../../components/shared/GlassCard';
-import Icon from '../../components/ui/Icon';
-import { collection, onSnapshot, doc, getDoc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { db, auth } from "../../firebase";
+import React, {
+  useEffect,
+  useState
+} from "react";
+
+import GlassCard from "../../components/shared/GlassCard";
+import Icon from "../../components/ui/Icon";
+
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+  doc,
+  getDoc
+} from "firebase/firestore";
+
+import {
+  onAuthStateChanged
+} from "firebase/auth";
+
+import {
+  db,
+  auth
+} from "../../firebase";
 
 const AuditLogsPage = () => {
+
   const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [hasAccess, setHasAccess] = useState(false);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [hasAccess, setHasAccess] =
+    useState(false);
+
+  const [currentUser, setCurrentUser] =
+    useState(null);
 
   useEffect(() => {
-    let unsubLogs = null;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const userRef = doc(db, "users", user.uid);
-          const userSnap = await getDoc(userRef);
+    let unsubscribeLogs = null;
 
-          if (!userSnap.exists()) {
-            console.warn("User document not found");
+    const unsubscribeAuth =
+      onAuthStateChanged(
+        auth,
+
+        async (user) => {
+
+          if (!user) {
+
             setHasAccess(false);
             setLoading(false);
+
             return;
           }
 
-          const userData = userSnap.data();
-          const role = userData.role;
+          try {
 
-          if (["admin", "reviewer"].includes(role)) {
+            setCurrentUser(user);
+
+            // Get user role
+            const userRef =
+              doc(db, "users", user.uid);
+
+            const userSnap =
+              await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+
+              console.warn(
+                "User profile missing"
+              );
+
+              setHasAccess(false);
+              setLoading(false);
+
+              return;
+            }
+
+            const userData =
+              userSnap.data();
+
+            const role =
+              userData.role || "researcher";
+
+            // Access control
+            if (
+              !["admin", "reviewer"]
+                .includes(role)
+            ) {
+
+              setHasAccess(false);
+              setLoading(false);
+
+              return;
+            }
+
             setHasAccess(true);
 
-            unsubLogs = onSnapshot(
+            // Optimized query
+            const logsQuery = query(
               collection(db, "auditLogs"),
-              (snapshot) => {
-                const logData = snapshot.docs.map(doc => ({
-                  id: doc.id,
-                  ...doc.data(),
-                }));
-                setLogs(
-                  logData.sort(
-                    (a, b) =>
-                      (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
-                  )
-                );
-                setLoading(false);
-              },
-              (error) => {
-                console.error("Snapshot listener error:", error.message);
-                setLoading(false);
-              }
+
+              orderBy(
+                "createdAt",
+                "desc"
+              ),
+
+              limit(25)
             );
-          } else {
-            setHasAccess(false);
+
+            unsubscribeLogs =
+              onSnapshot(
+
+                logsQuery,
+
+                (snapshot) => {
+
+                  const logsData =
+                    snapshot.docs.map(
+                      (doc) => ({
+
+                        id: doc.id,
+
+                        ...doc.data(),
+                      })
+                    );
+
+                  setLogs(logsData);
+
+                  setLoading(false);
+                },
+
+                (error) => {
+
+                  console.error(
+                    "Audit logs listener error:",
+                    error
+                  );
+
+                  setLoading(false);
+                }
+              );
+
+          } catch (error) {
+
+            console.error(
+              "Audit access error:",
+              error
+            );
+
             setLoading(false);
           }
-        } catch (err) {
-          console.error("Audit log access error:", err.message);
-          setHasAccess(false);
-          setLoading(false);
         }
-      } else {
-        console.warn("User not authenticated — audit logs not loaded.");
-        setHasAccess(false);
-        setLoading(false);
-      }
-    });
+      );
 
     return () => {
+
       unsubscribeAuth();
-      if (unsubLogs) unsubLogs();
+
+      if (unsubscribeLogs) {
+        unsubscribeLogs();
+      }
     };
+
   }, []);
 
-  return (
-    <div className="p-8">
-      <GlassCard className="p-6">
-        <h2 className="text-2xl font-bold text-white mb-6">Audit Logs</h2>
+  // Severity color
+  const getSeverityColor = (action) => {
 
+    if (!action)
+      return "text-gray-400";
+
+    if (
+      action.includes("Deleted") ||
+      action.includes("Failed")
+    ) {
+      return "text-red-400";
+    }
+
+    if (
+      action.includes("Approved")
+    ) {
+      return "text-green-400";
+    }
+
+    if (
+      action.includes("Warning") ||
+      action.includes("Flagged")
+    ) {
+      return "text-yellow-400";
+    }
+
+    return "text-cyan-400";
+  };
+
+  return (
+
+    <div className="p-8">
+
+      <GlassCard className="p-6">
+
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+
+          <div>
+
+            <h2 className="text-3xl font-bold text-white">
+              Audit Logs
+            </h2>
+
+            <p className="text-gray-400 mt-1">
+              Real-time security and activity monitoring
+            </p>
+
+          </div>
+
+          {currentUser && (
+
+            <div className="text-sm text-gray-400">
+
+              Logged in as:
+
+              <span className="text-cyan-400 ml-2">
+                {currentUser.email}
+              </span>
+
+            </div>
+          )}
+
+        </div>
+
+        {/* Access denied */}
         {!hasAccess ? (
-          <p className="text-red-400">Access denied: You don’t have permission to view audit logs.</p>
+
+          <div className="text-center py-20">
+
+            <p className="text-red-400 text-lg">
+              Access denied
+            </p>
+
+            <p className="text-gray-500 mt-2">
+              Admin or Reviewer access required
+            </p>
+
+          </div>
+
         ) : loading ? (
-          <p className="text-gray-400">Loading logs...</p>
+
+          <div className="text-center py-20">
+
+            <p className="text-gray-400">
+              Loading audit logs...
+            </p>
+
+          </div>
+
         ) : logs.length === 0 ? (
-          <p className="text-gray-400">No logs found.</p>
+
+          <div className="text-center py-20">
+
+            <p className="text-gray-400">
+              No audit logs available
+            </p>
+
+          </div>
+
         ) : (
-          <div className="relative border-l-2 border-gray-700 pl-8">
-            {logs.map(log => (
-              <div key={log.id} className="relative mb-8">
-                <div className="absolute -left-10 transform -translate-x-1/2 bg-blue-500 rounded-full h-8 w-8 flex items-center justify-center">
-                  <Icon name={log.icon || "file-text"} className="text-white" />
+
+          <div className="space-y-4">
+
+            {logs.map((log) => (
+
+              <GlassCard
+                key={log.id}
+                className="p-5 flex items-start gap-4"
+              >
+
+                {/* Icon */}
+                <div className="bg-cyan-500/20 p-3 rounded-full">
+
+                  <Icon
+                    name={
+                      log.icon ||
+                      "shield"
+                    }
+                    className="text-cyan-400"
+                  />
+
                 </div>
-                <GlassCard className="p-4">
-                  <p className="text-white font-semibold">{log.user}</p>
-                  <p className="text-gray-400 text-sm">{log.action}</p>
-                  <p className="text-gray-500 text-xs mt-1">
-                    {log.createdAt?.seconds
-                      ? new Date(log.createdAt.seconds * 1000).toLocaleString()
-                      : "Unknown time"}
-                  </p>
-                </GlassCard>
-              </div>
+
+                {/* Content */}
+                <div className="flex-1">
+
+                  <div className="flex justify-between items-start">
+
+                    <div>
+
+                      <p className="text-white font-semibold">
+
+                        {log.user ||
+                          "Unknown User"}
+
+                      </p>
+
+                      <p
+                        className={`mt-1 font-medium ${getSeverityColor(log.action)}`}
+                      >
+
+                        {log.action ||
+                          "Unknown Action"}
+
+                      </p>
+
+                      {log.datasetName && (
+
+                        <p className="text-gray-400 text-sm mt-2">
+
+                          Dataset:
+
+                          <span className="ml-2 text-cyan-300">
+                            {log.datasetName}
+                          </span>
+
+                        </p>
+                      )}
+
+                    </div>
+
+                    {/* Timestamp */}
+                    <div className="text-right text-xs text-gray-500">
+
+                      {log.createdAt?.seconds
+                        ? new Date(
+                            log.createdAt.seconds * 1000
+                          ).toLocaleString()
+                        : "Unknown time"}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </GlassCard>
             ))}
+
           </div>
         )}
+
       </GlassCard>
+
     </div>
   );
 };

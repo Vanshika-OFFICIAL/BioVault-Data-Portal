@@ -2,12 +2,7 @@
 import React, { useState, useEffect } from "react";
 import GlassCard from "../../components/shared/GlassCard";
 import BackgroundWrapper from "../../components/layout/BackgroundWrapper";
-import {
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-} from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase";
 
 const DatasetsPage = () => {
@@ -30,7 +25,7 @@ const DatasetsPage = () => {
   }, []);
 
   const filteredDatasets = datasets.filter((d) =>
-    d.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    d.name?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -75,16 +70,21 @@ const DatasetsPage = () => {
                       className="hover:bg-cyan-500/10 transition-colors cursor-pointer"
                       onClick={() =>
                         setExpandedRow(
-                          expandedRow === dataset.id ? null : dataset.id
+                          expandedRow === dataset.id ? null : dataset.id,
                         )
                       }
                     >
-                      <td className="py-4 px-4 font-semibold">{dataset.name}</td>
-                      <td className="py-4 px-4 hidden md:table-cell">
-                        {dataset.type}
+                      <td className="py-4 px-4 font-semibold">
+                        {dataset.name}
                       </td>
                       <td className="py-4 px-4 hidden md:table-cell">
-                        {dataset.size}
+                        <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-sm border border-cyan-500/20">
+                          {dataset.category || "General"}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-4 hidden md:table-cell text-gray-300">
+                        {dataset.fileSize || "N/A"}
                       </td>
                       <td className="py-4 px-4 hidden lg:table-cell">
                         {dataset.owner}
@@ -96,8 +96,8 @@ const DatasetsPage = () => {
                             dataset.status === "Approved"
                               ? "bg-green-600"
                               : dataset.status === "Pending"
-                              ? "bg-yellow-600"
-                              : "bg-red-600"
+                                ? "bg-yellow-600"
+                                : "bg-red-600"
                           }`}
                         >
                           {dataset.status}
@@ -114,19 +114,129 @@ const DatasetsPage = () => {
                       <tr>
                         <td
                           colSpan="6"
-                          className="p-4 bg-white/10 border-b border-cyan-500"
+                          className="p-6 bg-cyan-950/10 border-b border-cyan-500/20"
                         >
-                          <div className="text-sm text-gray-300 space-y-2">
-                            <p>
-                              <strong>Description:</strong>{" "}
+                          {/* Description */}
+                          <div className="mb-6">
+                            <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                              Description
+                            </p>
+
+                            <p className="text-gray-200 leading-relaxed">
                               {dataset.description ||
-                                "No description available."}
+                                "No description available"}
                             </p>
-                            <p>
-                              <strong>Access Level:</strong> {dataset.access}
-                            </p>
-                            <div className="mt-4 h-32 bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 border border-cyan-400/30">
-                              [Interactive Graph Placeholder]
+                          </div>
+
+                          {/* Access */}
+                          <div className="mb-6 flex items-center gap-3">
+                            <span className="text-gray-400">Access Level:</span>
+
+                            <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-sm">
+                              {dataset.access || "public"}
+                            </span>
+                          </div>
+
+                          {/* Analytics Cards */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div className="bg-white/5 border border-cyan-500/10 rounded-xl p-4">
+                              <p className="text-gray-400 text-sm">Rows</p>
+
+                              <h3 className="text-2xl font-bold text-cyan-400 mt-2">
+                                {dataset.totalRows || 0}
+                              </h3>
+                            </div>
+
+                            <div className="bg-white/5 border border-cyan-500/10 rounded-xl p-4">
+                              <p className="text-gray-400 text-sm">Columns</p>
+
+                              <h3 className="text-2xl font-bold text-cyan-400 mt-2">
+                                {dataset.totalColumns || 0}
+                              </h3>
+                            </div>
+
+                            <div className="bg-white/5 border border-cyan-500/10 rounded-xl p-4">
+                              <p className="text-gray-400 text-sm">Category</p>
+
+                              <h3 className="text-lg font-bold text-white mt-2">
+                                {dataset.category || "General"}
+                              </h3>
+                            </div>
+
+                            <div className="bg-white/5 border border-cyan-500/10 rounded-xl p-4">
+                              <p className="text-gray-400 text-sm">Risk</p>
+
+                              <h3
+                                className={`text-lg font-bold mt-2 ${
+                                  dataset.riskLevel === "High"
+                                    ? "text-red-400"
+                                    : dataset.riskLevel === "Medium"
+                                      ? "text-yellow-400"
+                                      : "text-green-400"
+                                }`}
+                              >
+                                {dataset.riskLevel || "Low"}
+                              </h3>
+                            </div>
+                          </div>
+
+                          {/* Column Names */}
+                          <div className="mb-6">
+                            <h3 className="text-cyan-400 font-semibold mb-3">
+                              Dataset Columns
+                            </h3>
+
+                            <div className="flex flex-wrap gap-2">
+                              {dataset.columnNames?.map((col, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-sm"
+                                >
+                                  {col}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Preview Table */}
+                          <div>
+                            <h3 className="text-cyan-400 font-semibold mb-4">
+                              Dataset Preview
+                            </h3>
+
+                            <div className="overflow-x-auto rounded-xl border border-cyan-500/20">
+                              <table className="w-full text-sm">
+                                <thead className="bg-cyan-950/40">
+                                  <tr>
+                                    {dataset.columnNames?.map((col, index) => (
+                                      <th
+                                        key={index}
+                                        className="p-3 text-left text-cyan-300"
+                                      >
+                                        {col}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+
+                                <tbody>
+                                  {dataset.previewData?.map((row, rowIndex) => (
+                                    <tr
+                                      key={rowIndex}
+                                      className="border-t border-cyan-500/10 hover:bg-cyan-500/5"
+                                    >
+                                      {Object.values(row).map((value, i) => (
+                                        <td
+                                          key={i}
+                                          className="p-3 text-gray-300"
+                                        >
+                                          {String(value)}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
                           </div>
                         </td>

@@ -22,12 +22,18 @@ import {
 // 🔹 Helper: Audit log likhne ka function
 const addAuditLog = async (action, user) => {
   if (!user?.uid) return;
+
+  if (!auth.currentUser) return;
+
   try {
     await addDoc(collection(db, "auditLogs"), {
       action,
       user: user.email || "Unknown",
+
       uid: user.uid,
+
       createdAt: serverTimestamp(),
+
       icon: "activity",
     });
   } catch (err) {
@@ -69,15 +75,33 @@ const useAuthStore = create((set) => ({
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const docRef = doc(db, "users", user.uid);
-          const docSnap = await getDoc(docRef);
+          let userData = null;
 
-          if (!docSnap.exists()) {
-            console.warn("User document not found");
-            return;
+          try {
+            const docRef = doc(db, "users", user.uid);
+
+            const docSnap = await getDoc(docRef);
+
+            if (!docSnap.exists()) {
+              console.warn("User document not found");
+
+              // Auto-create missing user doc
+              userData = await ensureUserDoc(user);
+            } else {
+              userData = docSnap.data();
+            }
+          } catch (firestoreError) {
+            console.error(
+              "Firestore user fetch failed:",
+              firestoreError.message,
+            );
+
+            // fallback user object
+            userData = {
+              role: "researcher",
+              name: user.displayName || "Unknown User",
+            };
           }
-
-          const userData = docSnap.data();
 
           set({
             user: {
@@ -119,7 +143,11 @@ const useAuthStore = create((set) => ({
 
   // 🔹 Email signup
   signup: async (name, email, password, role) => {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    const { user } = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
     await updateProfile(user, { displayName: name });
 
     await ensureUserDoc(user, { name, role, provider: "email" });

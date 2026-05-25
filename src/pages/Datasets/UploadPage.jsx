@@ -1,10 +1,14 @@
-// src/pages/datasets/UploadPage.jsx
 import React, { useState, useRef } from "react";
 import GlassCard from "../../components/shared/GlassCard";
 import AnimatedInput from "../../components/ui/AnimatedInput";
+
 import { db } from "../../firebase";
+
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+
 import { getAuth } from "firebase/auth";
+
+import Papa from "papaparse";
 
 const UploadPage = () => {
   const [formData, setFormData] = useState({
@@ -12,62 +16,217 @@ const UploadPage = () => {
     description: "",
     access: "public",
   });
-  const [file, setFile] = useState(null); // ✅ file state
+
+  const [file, setFile] = useState(null);
+
   const [loading, setLoading] = useState(false);
-  const fileInputRef = useRef(null); // ✅ ref for hidden input
+
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // ✅ handle file select
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      console.log("Selected file:", selectedFile.name);
+
+    if (!selectedFile) return;
+
+    // CSV validation
+    if (!selectedFile.name.endsWith(".csv")) {
+      alert("Only CSV files are allowed");
+
+      return;
     }
+
+    // File size validation
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      alert("File size must be under 5MB");
+
+      return;
+    }
+
+    setFile(selectedFile);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!file) {
+      alert("Please select a CSV file");
+
+      return;
+    }
+
     setLoading(true);
 
     try {
       const auth = getAuth();
+
       const user = auth.currentUser;
 
       if (!user) {
-        alert("Please log in before uploading a dataset.");
+        alert("Please login first");
+
         setLoading(false);
+
         return;
       }
 
-      // ✅ For now we just log file (later integrate Firebase Storage)
-      console.log("Uploading dataset:", formData, "File:", file?.name);
+      // Parse CSV
+      Papa.parse(file, {
+        header: true,
 
-      // Firestore mein save karna
-      await addDoc(collection(db, "datasets"), {
-        name: formData.name,
-        description: formData.description,
-        access: formData.access,
-        owner: user.email || "Unknown",
-        ownerId: user.uid,
-        fileName: file?.name || null, // ✅ storing filename
-        status: "Pending",
-        createdAt: serverTimestamp(),
+        skipEmptyLines: true,
+
+        complete: async function (results) {
+          try {
+            const rows = results.data;
+
+            if (!rows.length) {
+              alert("CSV file is empty");
+
+              setLoading(false);
+
+              return;
+            }
+
+            // Analytics
+            const totalRows = rows.length;
+
+            const columnNames = Object.keys(rows[0]).map((col) =>
+              col.toLowerCase(),
+            );
+
+            const totalColumns = columnNames.length;
+
+            const previewData = rows.slice(0, 5);
+
+            // Auto category detection
+            let category = "General";
+
+            if (
+              columnNames.includes("country") ||
+              columnNames.includes("vaccinations")
+            ) {
+              category = "Epidemiology";
+            }
+
+            if (
+              columnNames.includes("gene") ||
+              columnNames.includes("mutation")
+            ) {
+              category = "Genomics";
+            }
+
+            if (
+              columnNames.includes("patient") ||
+              columnNames.includes("diagnosis")
+            ) {
+              category = "Clinical Research";
+            }
+
+            // Fake risk detection
+            let riskLevel = "Low";
+
+            if (totalRows > 1000) {
+              riskLevel = "Medium";
+            }
+
+            if (totalRows > 10000) {
+              riskLevel = "High";
+            }
+
+            // Save dataset
+            const datasetRef = await addDoc(collection(db, "datasets"), {
+              name: formData.name,
+
+              description: formData.description,
+
+              access: formData.access,
+
+              owner: user.email || "Unknown",
+
+              ownerId: user.uid,
+
+              fileName: file.name,
+
+              fileSize: `${(file.size / 1024).toFixed(2)} KB`,
+
+              status: "Processed",
+
+              createdAt: serverTimestamp(),
+
+              totalRows,
+
+              totalColumns,
+
+              columnNames,
+
+              previewData,
+
+              category,
+
+              riskLevel,
+            });
+            // Create audit log
+            await addDoc(collection(db, "auditLogs"), {
+              action: "Uploaded Dataset",
+
+              user: user.email,
+
+              datasetName: formData.name,
+
+              createdAt: serverTimestamp(),
+
+              icon: "upload",
+            });
+
+            console.log("Audit log created");
+            // Activity log
+            await addDoc(collection(db, "auditLogs"), {
+              action: "Uploaded Dataset",
+
+              datasetId: datasetRef.id,
+
+              datasetName: formData.name,
+
+              user: user.email,
+
+              createdAt: serverTimestamp(),
+            });
+
+            alert("Dataset processed successfully");
+
+            // Reset
+            setFormData({
+              name: "",
+              description: "",
+              access: "public",
+            });
+
+            setFile(null);
+          } catch (error) {
+            console.error(error);
+
+            alert("Processing failed");
+          }
+
+          setLoading(false);
+        },
       });
-
-      alert("✅ Dataset uploaded successfully!");
-      setFormData({ name: "", description: "", access: "public" });
-      setFile(null);
     } catch (error) {
-      console.error("Error uploading dataset:", error);
-      alert("❌ Upload failed!");
-    }
+      console.error(error);
 
-    setLoading(false);
+      alert("Upload failed");
+
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,27 +234,29 @@ const UploadPage = () => {
       <GlassCard className="p-8">
         <h2 className="text-2xl font-bold text-white mb-6">Upload Dataset</h2>
 
-        {/* Upload Box */}
+        {/* Upload Area */}
         <div
-          className="border-2 border-dashed border-gray-600 rounded-lg p-10 text-center mb-6"
-          onClick={() => fileInputRef.current.click()} // ✅ whole box clickable
+          className="border-2 border-dashed border-gray-600 rounded-lg p-10 text-center mb-6 cursor-pointer"
+          onClick={() => fileInputRef.current.click()}
         >
           <p className="text-gray-400">
-            Drag and drop your files here, or{" "}
-            <span
-              className="text-blue-500 cursor-pointer underline"
-              onClick={(e) => {
-                e.stopPropagation(); // stop bubbling
-                fileInputRef.current.click();
-              }}
-            >
-              browse
-            </span>
+            Drag and drop your CSV file here, or
+            <span className="text-blue-500 underline ml-1">browse</span>
           </p>
-          {file && <p className="mt-3 text-green-400">Selected: {file.name}</p>}
-          {/* Hidden File Input */}
+
+          {file && (
+            <div className="mt-4">
+              <p className="text-green-400">{file.name}</p>
+
+              <p className="text-gray-400 text-sm">
+                {(file.size / 1024).toFixed(2)} KB
+              </p>
+            </div>
+          )}
+
           <input
             type="file"
+            accept=".csv"
             ref={fileInputRef}
             onChange={handleFileChange}
             className="hidden"
@@ -112,6 +273,7 @@ const UploadPage = () => {
             onChange={handleChange}
             required
           />
+
           <AnimatedInput
             label="Description"
             type="text"
@@ -121,40 +283,37 @@ const UploadPage = () => {
             required
           />
 
-          {/* Access dropdown */}
-          <div className="relative">
-            <label
-              htmlFor="access"
-              className="block text-gray-400 text-lg mb-2"
-            >
-              Access Control
-            </label>
+          {/* Access */}
+          <div>
+            <label className="block text-gray-400 mb-2">Access Control</label>
+
             <select
               name="access"
-              id="access"
               value={formData.access}
               onChange={handleChange}
-              className="w-full bg-white/10 text-white rounded-lg p-3 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-white/10 text-white rounded-lg p-3 border border-gray-600"
             >
               <option className="bg-gray-800" value="public">
                 Public
               </option>
+
               <option className="bg-gray-800" value="restricted">
                 Restricted
               </option>
+
               <option className="bg-gray-800" value="private">
                 Private
               </option>
             </select>
           </div>
 
-          {/* Submit button */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50"
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all"
           >
-            {loading ? "Uploading..." : "Upload"}
+            {loading ? "Processing Dataset..." : "Upload & Analyze Dataset"}
           </button>
         </form>
       </GlassCard>
