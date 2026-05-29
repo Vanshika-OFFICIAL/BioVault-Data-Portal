@@ -9,12 +9,15 @@ https://biovault-e4f8e.web.app/
 
 ## 🔑 Demo Credentials
 
-Use the following account to explore the platform as a Researcher:
+Use the following account to explore the platform as a Researcher and Reviewer:
 
 **Role:** Researcher
-**Email:** [researcher@biovault.com](mailto:researcher@biovault.com)
-**Password:** Researcher@123
+**Email:** researcher@gmail.com
+**Password:** researcher@123
 
+**Role:** Reviewer
+**Email:** reviewer@gmail.com
+**Password:** reviewer@123
 > These credentials are provided for demonstration and evaluation purposes.
 
 ## ✨ Features
