@@ -1,81 +1,97 @@
 # BioVault Data Portal
 
-A secure, role-based biomedical data platform built with React, Firebase, and Vite. BioVault enables researchers, reviewers, and admins to manage sensitive datasets with real-time access control, audit logging, and ethical transparency. Designed for scalable, modular deployment.
+BioVault Data Portal is a secure biomedical research platform built using React, Firebase, and Vite. The platform enables researchers to access, manage, and organize biomedical datasets through a modern role-based interface while maintaining data transparency and security.
 
 ## 🚀 Live Demo
 
-[Live Site](https://biovault-e4f8e.firebaseapp.com/)
+**Application URL:**
+https://biovault-e4f8e.web.app/
 
-## Features
+## 🔑 Demo Credentials
 
-- Role-based authentication (Admin, Researcher, Reviewer)
-- Real-time dataset management (Firestore)
-- Secure file uploads (Firebase Storage integration ready)
-- Audit logging for all user actions
-- Responsive UI with Tailwind CSS and glassmorphism design
-- Modular React components and Zustand state management
+Use the following account to explore the platform as a Researcher:
 
-## Getting Started
+**Role:** Researcher
+**Email:** [researcher@biovault.com](mailto:researcher@biovault.com)
+**Password:** Researcher@123
 
-### Prerequisites
+> These credentials are provided for demonstration and evaluation purposes.
 
-- Node.js (v18+ recommended)
-- npm
+## ✨ Features
 
-### Installation
+* Secure Firebase Authentication
+* Role-Based Access Control
+* Researcher Dashboard
+* Biomedical Dataset Management
+* Responsive Design for Desktop and Mobile
+* Modern UI built with Tailwind CSS
+* Real-Time Firebase Integration
+* Modular and Scalable React Architecture
+* Protected Routes and Session Management
 
-```sh
-git clone https://github.com/yourusername/biovault.git
-cd biovault
+## 🛠️ Tech Stack
+
+* React.js
+* Vite
+* Firebase Authentication
+* Cloud Firestore
+* Firebase Hosting
+* Tailwind CSS
+* JavaScript (ES6+)
+
+## 📦 Installation
+
+```bash
+git clone https://github.com/Vanshika-OFFICIAL/BioVault-Data-Portal.git
+
+cd BioVault-Data-Portal
+
 npm install
 ```
 
-### Development
+## 💻 Run Locally
 
-```sh
+```bash
 npm run dev
 ```
 
-### Build
+The application will be available at:
 
-```sh
+```text
+http://localhost:5173
+```
+
+## 🚀 Production Build
+
+```bash
 npm run build
 ```
 
-### Preview
+## 🌐 Deployment
 
-```sh
-npm run preview
+```bash
+firebase deploy --only hosting
 ```
 
-## Firebase Setup
+## 📁 Project Structure
 
-1. Create a Firebase project.
-2. Update `src/firebase.js` with your Firebase config.
-3. Enable Firestore, Authentication, and Storage as needed.
-
-## Folder Structure
-
-```
-biovault/
-  ├── src/
-  │   ├── components/
-  │   ├── pages/
-  │   ├── services/
-  │   ├── state/
-  │   ├── styles/
-  │   └── utils/
-  ├── public/
-  ├── package.json
-  ├── tailwind.config.js
-  ├── vite.config.js
-  └── ...
+```text
+src/
+├── components/
+├── pages/
+├── services/
+├── hooks/
+├── assets/
+├── context/
+└── utils/
 ```
 
-## License
+## 📖 Support
 
-MIT © Vanshika
+For project evaluation, please use the provided demo credentials.
 
----
+If you encounter any issues while testing the application, please create an issue in the repository.
 
-**Live Link:** [https://biovault-e4f8e.firebaseapp.com/]
+## 📄 License
+
+This project is intended for educational, research, and portfolio demonstration purposes.
