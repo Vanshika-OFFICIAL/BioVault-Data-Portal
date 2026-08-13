@@ -96,7 +96,7 @@ export default function App() {
   // 🔹 Unauthenticated layout
   const renderAuthFlow = () => (
     <BackgroundWrapper>
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen">
         {currentPage === "signup" ? (
           <SignupPage
             onSignup={(name, email, password, role) =>

@@ -6,4 +6,16 @@
   body {
     @apply bg-dark-bg text-gray-200 font-sans;
   }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: #e2e8f0;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.75) inset;
+    box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.75) inset;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: #e2e8f0;
+  }
 }

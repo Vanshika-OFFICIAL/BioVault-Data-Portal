@@ -9,6 +9,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import GlassCard from "../../components/shared/GlassCard";
 import AnimatedInput from "../../components/ui/AnimatedInput";
+import AuthSplitLayout from "../../components/auth/AuthSplitLayout";
 
 const SignupPage = ({ onLoginClick }) => {
   const [formData, setFormData] = useState({
@@ -98,107 +99,112 @@ const SignupPage = ({ onLoginClick }) => {
   };
 
   return (
-    <GlassCard className="p-8 w-full max-w-md border border-cyan-400/20 shadow-[0_0_20px_#00ffff40]">
-      <h2 className="text-3xl font-bold text-center text-cyan-300 mb-6">
-        Create Account
-      </h2>
+    <AuthSplitLayout>
+      <GlassCard className="w-full rounded-3xl border border-cyan-400/20 bg-slate-900/60 p-6 sm:p-8 shadow-[0_0_16px_#00ffff33]">
+        <h2 className="mb-2 text-2xl sm:text-3xl font-bold text-center text-cyan-300">
+          Create Account
+        </h2>
+        <p className="mb-6 text-center text-sm text-slate-300">
+          Join BioVault to securely manage biomedical data.
+        </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <AnimatedInput
-          label="Name"
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        <AnimatedInput
-          label="Email"
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <AnimatedInput
-          label="Password"
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-
-        {/* 🔹 Role Selection */}
-        <div className="relative">
-          <label htmlFor="role" className="block text-gray-400 text-sm mb-2">
-            Role
-          </label>
-          <select
-            name="role"
-            id="role"
-            value={formData.role}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <AnimatedInput
+            label="Name"
+            type="text"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
-            className="w-full bg-white/10 text-white rounded-lg p-3 border border-cyan-400/30 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          />
+          <AnimatedInput
+            label="Email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <AnimatedInput
+            label="Password"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+
+          {/* 🔹 Role Selection */}
+          <div className="relative">
+            <label htmlFor="role" className="block text-gray-400 text-sm mb-2">
+              Role
+            </label>
+            <select
+              name="role"
+              id="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full bg-white/10 text-white rounded-xl p-3 border border-cyan-400/30 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            >
+              <option className="bg-gray-800" value="researcher">
+                Researcher
+              </option>
+              <option className="bg-gray-800" value="reviewer">
+                Reviewer
+              </option>
+            </select>
+          </div>
+
+          {/* 🔹 Error Message */}
+          {error && (
+            <div className="text-red-400 text-sm text-center">
+              {error}
+              {error.includes("Email already in use") && (
+                <button
+                  onClick={onLoginClick}
+                  className="ml-2 text-cyan-400 underline"
+                >
+                  Go to Login
+                </button>
+              )}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50"
           >
-            <option className="bg-gray-800" value="researcher">
-              Researcher
-            </option>
-            <option className="bg-gray-800" value="reviewer">
-              Reviewer
-            </option>
-          </select>
+            {loading ? "Signing up..." : "Sign Up"}
+          </button>
+        </form>
+
+        {/* 🔹 Google Auth */}
+        <div className="mt-6">
+          <button
+            onClick={handleGoogleSignup}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-cyan-300/30 bg-cyan-400/10 text-slate-100 font-semibold hover:bg-cyan-400/15 transition disabled:opacity-50"
+          >
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+              className="w-5 h-5"
+            />
+            Continue with Google
+          </button>
         </div>
 
-        {/* 🔹 Error Message */}
-        {error && (
-          <div className="text-red-400 text-sm text-center">
-            {error}
-            {error.includes("Email already in use") && (
-              <button
-                onClick={onLoginClick}
-                className="ml-2 text-cyan-400 underline"
-              >
-                Go to Login
-              </button>
-            )}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50"
-        >
-          {loading ? "Signing up..." : "Sign Up"}
-        </button>
-      </form>
-
-      {/* 🔹 Google Auth */}
-      <div className="mt-6">
-        <button
-          onClick={handleGoogleSignup}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-white text-gray-700 font-semibold rounded-lg shadow hover:bg-gray-100 transition disabled:opacity-50"
-        >
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            className="w-5 h-5"
-          />
-          Continue with Google
-        </button>
-      </div>
-
-      {/* 🔹 Login Redirect */}
-      <div className="text-center text-gray-400 mt-4 text-sm">
-        Already have an account?{" "}
-        <button
-          onClick={onLoginClick}
-          type="button"
-          className="text-cyan-400 hover:underline focus:outline-none"
-        >
-          Login
-        </button>
-      </div>
-    </GlassCard>
+        {/* 🔹 Login Redirect */}
+        <div className="text-center text-gray-400 mt-4 text-sm">
+          Already have an account?{" "}
+          <button
+            onClick={onLoginClick}
+            type="button"
+            className="text-cyan-400 hover:underline focus:outline-none"
+          >
+            Login
+          </button>
+        </div>
+      </GlassCard>
+    </AuthSplitLayout>
   );
 };
 
