@@ -129,13 +129,6 @@ const DashboardPage = () => {
     const totalDatasets =
       datasets.length;
 
-    const totalRows =
-      datasets.reduce(
-        (sum, dataset) =>
-          sum + (dataset.totalRows || 0),
-        0
-      );
-
     const highRisk =
       datasets.filter(
         (dataset) =>
@@ -156,7 +149,6 @@ const DashboardPage = () => {
 
     return {
       totalDatasets,
-      totalRows,
       highRisk,
       approved,
       pending,
@@ -228,34 +220,10 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#071021] via-[#081327] to-[#091834] text-white p-2">
 
       {/* ========================================= */}
-      {/* HEADER */}
-      {/* ========================================= */}
-
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2 mb-10">
-
-        <div>
-
-          <h1 className="text-5xl font-black tracking-tight text-cyan-400">
-
-            BioVault Intelligence
-
-          </h1>
-
-          <p className="text-gray-400 text-sm mt-3">
-
-            Secure biomedical analytics & research monitoring system
-
-          </p>
-
-        </div>
-
-      </div>
-
-      {/* ========================================= */}
       {/* STATS */}
       {/* ========================================= */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-5 gap-2 mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 2xl:grid-cols-4 gap-2 mb-10">
 
         {/* TOTAL */}
 
@@ -271,7 +239,7 @@ const DashboardPage = () => {
 
               </p>
 
-              <h2 className="text-3xl font-black mt-4 text-white">
+              <h2 className="text-3xl font-black mt-2 text-white">
 
                 {analytics.totalDatasets}
 
@@ -289,38 +257,7 @@ const DashboardPage = () => {
 
         </GlassCard>
 
-        {/* ROWS */}
-
-        <GlassCard className="p-6 border border-yellow-500/10">
-
-          <div className="flex justify-between items-start">
-
-            <div>
-
-              <p className="text-gray-400 text-sm uppercase tracking-wider">
-
-                Total Rows
-
-              </p>
-
-              <h2 className="text-3xl font-black mt-4 text-yellow-400">
-
-                {analytics.totalRows}
-
-              </h2>
-
-            </div>
-
-            <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center">
-
-              <BarChart3 className="text-yellow-400 w-8 h-8" />
-
-            </div>
-
-          </div>
-
-        </GlassCard>
-
+       
         {/* APPROVED */}
 
         <GlassCard className="p-6 border border-green-500/10">
@@ -335,7 +272,7 @@ const DashboardPage = () => {
 
               </p>
 
-              <h2 className="text-3xl font-black mt-4 text-green-400">
+              <h2 className="text-3xl font-black mt-2 text-green-400">
 
                 {analytics.approved}
 
@@ -367,7 +304,7 @@ const DashboardPage = () => {
 
               </p>
 
-              <h2 className="text-3xl font-black mt-4 text-orange-400">
+              <h2 className="text-3xl font-black mt-2 text-orange-400">
 
                 {analytics.pending}
 
@@ -399,7 +336,7 @@ const DashboardPage = () => {
 
               </p>
 
-              <h2 className="text-3xl font-black mt-4 text-red-400">
+              <h2 className="text-3xl font-black mt-2 text-red-400">
 
                 {analytics.highRisk}
 

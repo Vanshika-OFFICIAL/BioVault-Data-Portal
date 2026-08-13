@@ -28,13 +28,13 @@ const ProfileHero = ({ user }) => {
 
   return (
 
-    <div className="rounded-2xl border border-cyan-400/20 bg-[#0b1222]/90 p-4 lg:p-5 shadow-[0_0_40px_rgba(0,255,255,0.06)]">
+    <div className="rounded-2xl border border-cyan-400/20 bg-[#0b1222]/90 p-3 sm:p-4 shadow-[0_0_40px_rgba(0,255,255,0.06)]">
 
-      <div className="flex flex-col xl:flex-row gap-8 items-center xl:items-start">
+      <div className="flex flex-col xl:flex-row gap-5 items-center xl:items-start">
 
         {/* LEFT */}
 
-        <div className="flex flex-col sm:flex-row items-center gap-6 flex-1">
+        <div className="flex flex-col sm:flex-row items-center gap-4 flex-1">
 
           {/* AVATAR */}
 
@@ -83,7 +83,7 @@ const ProfileHero = ({ user }) => {
 
               </h2>
 
-              <span className="px-4 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 capitalize text-sm">
+              <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 capitalize text-sm">
 
                 {user?.role || "researcher"}
 
@@ -97,7 +97,7 @@ const ProfileHero = ({ user }) => {
 
             </p>
 
-            <div className="flex items-center gap-2 mt-4 text-green-400 justify-center sm:justify-start">
+            <div className="flex items-center gap-2 mt-3 text-green-400 justify-center sm:justify-start">
 
               <BadgeCheck size={18} />
 
@@ -159,7 +159,7 @@ const ProfileHero = ({ user }) => {
 
           {/* CARD */}
 
-          <div className="bg-white/5 border border-cyan-400/10 rounded-xl p-5 w-full">
+          <div className="bg-white/5 border border-cyan-400/10 rounded-xl p-4 w-full">
 
             <p className="text-gray-400 text-sm mb-1">
 

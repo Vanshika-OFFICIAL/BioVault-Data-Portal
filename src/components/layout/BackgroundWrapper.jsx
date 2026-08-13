@@ -9,7 +9,7 @@ const BackgroundWrapper = ({ children }) => {
       </div>
 
       {/* Page Content */}
-      <div className="relative z-10 p-8">
+      <div className="relative z-10 p-3 sm:p-4 lg:p-5">
         {children}
       </div>
     </div>

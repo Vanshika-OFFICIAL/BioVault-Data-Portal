@@ -16,8 +16,8 @@ const Sidebar = ({ currentPage, onNavigate, hasPermission, isOpen, onClose }) =>
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 p-6 bg-white/5 backdrop-blur-xl border-r border-cyan-400/20 shadow-[0_0_25px_#00ffff30]">
-        <h1 className="text-3xl font-bold mb-10 text-cyan-300 tracking-widest select-none">BioVault</h1>
+      <aside className="hidden md:flex flex-col w-64 p-4 bg-white/5 backdrop-blur-xl border-r border-cyan-400/20 shadow-[0_0_25px_#00ffff30]">
+        <h1 className="text-3xl font-bold mb-6 text-cyan-300 tracking-widest select-none">BioVault</h1>
         <nav className="flex-grow space-y-2">
           {visibleLinks.map(link => (
             <button
@@ -53,8 +53,8 @@ const Sidebar = ({ currentPage, onNavigate, hasPermission, isOpen, onClose }) =>
           onClick={onClose}
         />
 
-        <div className="relative z-50 flex flex-col w-64 h-full p-6 bg-[#0a0f1c] backdrop-blur-xl border-r border-cyan-400/20 shadow-[0_0_25px_#00ffff50]">
-          <div className="flex justify-between items-center mb-8">
+        <div className="relative z-50 flex flex-col w-64 h-full p-4 bg-[#0a0f1c] backdrop-blur-xl border-r border-cyan-400/20 shadow-[0_0_25px_#00ffff50]">
+          <div className="flex justify-between items-center mb-5">
             <h1 className="text-2xl font-bold text-cyan-300">BioVault</h1>
             <button onClick={onClose} className="p-2 rounded-md hover:bg-cyan-500/10">
               <Icon name="close" className="text-cyan-300 w-6 h-6" />

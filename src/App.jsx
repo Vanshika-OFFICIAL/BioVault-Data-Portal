@@ -87,7 +87,7 @@ export default function App() {
             user={user}
             onToggleSidebar={() => setIsSidebarOpen(true)}
           />
-          <main className="flex-1 p-6 overflow-y-auto">{renderPage()}</main>
+          <main className="flex-1 p-3 sm:p-4 overflow-y-auto">{renderPage()}</main>
         </div>
       </div>
     </BackgroundWrapper>

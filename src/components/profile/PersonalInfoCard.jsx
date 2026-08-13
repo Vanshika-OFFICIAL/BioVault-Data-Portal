@@ -84,11 +84,11 @@ const PersonalInfoCard = ({ user }) => {
 
   return (
 
-    <Card className="p-5 rounded-2xl">
+    <Card className="p-4 rounded-2xl">
 
       {/* HEADER */}
 
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-4">
 
         <div>
 
@@ -153,7 +153,7 @@ const PersonalInfoCard = ({ user }) => {
 
       {/* INFO */}
 
-      <div className="space-y-5">
+      <div className="space-y-4">
 
         {/* NAME */}
 

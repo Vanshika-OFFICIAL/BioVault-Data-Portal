@@ -24,11 +24,11 @@ const SecurityCard = () => {
 
   return (
 
-    <Card className="p-5 rounded-2xl">
+    <Card className="p-4 rounded-2xl">
 
       {/* HEADER */}
 
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
 
         <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
 
